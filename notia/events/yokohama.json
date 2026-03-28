@@ -1,0 +1,159 @@
+[
+  {
+    "event_id": "evt-yoko-0",
+    "domain": "supply",
+    "type": "import_scan",
+    "timestamp": "2026-02-14T10:00:00Z",
+    "meaning": {
+      "object_ref": "container:TCNU9876543",
+      "logs": []
+    }
+  },
+  {
+    "event_id": "evt-yoko-1",
+    "domain": "supply",
+    "type": "import_scan",
+    "timestamp": "2026-02-14T10:01:00Z",
+    "meaning": {
+      "object_ref": "container:TCNU9876543",
+      "logs": []
+    }
+  },
+  {
+    "event_id": "evt-yoko-2",
+    "domain": "supply",
+    "type": "import_scan",
+    "timestamp": "2026-02-14T10:02:00Z",
+    "meaning": {
+      "object_ref": "container:TCNU9876543",
+      "logs": []
+    }
+  },
+  {
+    "event_id": "evt-yoko-3",
+    "domain": "supply",
+    "type": "import_scan",
+    "timestamp": "2026-02-14T10:03:00Z",
+    "meaning": {
+      "object_ref": "container:TCNU9876543",
+      "logs": []
+    }
+  },
+  {
+    "event_id": "evt-yoko-4",
+    "domain": "supply",
+    "type": "import_scan",
+    "timestamp": "2026-02-14T10:04:00Z",
+    "meaning": {
+      "object_ref": "container:TCNU9876543",
+      "logs": []
+    }
+  },
+  {
+    "event_id": "evt-yoko-5",
+    "domain": "supply",
+    "type": "import_scan",
+    "timestamp": "2026-02-14T10:05:00Z",
+    "meaning": {
+      "object_ref": "container:TCNU9876543",
+      "logs": []
+    }
+  },
+  {
+    "event_id": "evt-yoko-6",
+    "domain": "supply",
+    "type": "import_scan",
+    "timestamp": "2026-02-14T10:06:00Z",
+    "meaning": {
+      "object_ref": "container:TCNU9876543",
+      "logs": []
+    }
+  },
+  {
+    "event_id": "evt-yoko-7",
+    "domain": "supply",
+    "type": "import_scan",
+    "timestamp": "2026-02-14T10:07:00Z",
+    "meaning": {
+      "object_ref": "container:TCNU9876543",
+      "logs": []
+    }
+  },
+  {
+    "event_id": "evt-yoko-8",
+    "domain": "supply",
+    "type": "import_scan",
+    "timestamp": "2026-02-14T10:08:00Z",
+    "meaning": {
+      "object_ref": "container:TCNU9876543",
+      "logs": []
+    }
+  },
+  {
+    "event_id": "evt-yoko-9",
+    "domain": "supply",
+    "type": "import_scan",
+    "timestamp": "2026-02-14T10:09:00Z",
+    "meaning": {
+      "object_ref": "container:TCNU9876543",
+      "logs": []
+    }
+  },
+  {
+    "event_id": "evt-yoko-10",
+    "domain": "supply",
+    "type": "import_scan",
+    "timestamp": "2026-02-14T10:10:00Z",
+    "meaning": {
+      "object_ref": "container:TCNU9876543",
+      "logs": []
+    }
+  },
+  {
+    "event_id": "evt-yoko-11",
+    "domain": "supply",
+    "type": "import_scan",
+    "timestamp": "2026-02-14T10:11:00Z",
+    "meaning": {
+      "object_ref": "container:TCNU9876543",
+      "logs": []
+    }
+  },
+  {
+    "event_id": "evt-yoko-12",
+    "domain": "supply",
+    "type": "import_scan",
+    "timestamp": "2026-02-14T10:12:00Z",
+    "meaning": {
+      "object_ref": "container:TCNU9876543",
+      "logs": []
+    }
+  },
+  {
+    "event_id": "evt-yoko-13",
+    "domain": "supply",
+    "type": "import_scan",
+    "timestamp": "2026-02-14T10:13:00Z",
+    "meaning": {
+      "object_ref": "container:TCNU9876543",
+      "logs": []
+    }
+  },
+  {
+    "event_id": "evt-yoko-14",
+    "domain": "supply",
+    "type": "import_scan",
+    "timestamp": "2026-02-14T10:14:00Z",
+    "meaning": {
+      "object_ref": "container:TCNU9876543",
+      "logs": [
+        "cold_chain_temperature_log",
+        "geo_tracking_log",
+        "weight_verification_scan",
+        "humidity_sensor_data",
+        "seal_integrity_check",
+        "xray_scan_result"
+      ]
+    }
+  }
+]

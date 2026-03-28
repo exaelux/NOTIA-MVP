@@ -1,0 +1,14 @@
+{
+  "id": "borderpass-alt",
+  "label": "Scenario ALT",
+  "networkLabel": "IOTA Testnet",
+  "runtimeVersion": "v0.1",
+  "eventSource": "onchain",
+  "anchorProfileId": "borderpass-alt-v1",
+  "subjectRef": "subject:entity:sample-alt-001",
+  "eventsPath": "events/bordertest.json",
+  "vehicleCertificateObjectId": "0x33eb9fcb6682f1c1bedb9a50e8bf91d6867e97bd8e447171b8113f37c8ced599",
+  "cargoManifestObjectId": "0x8f9d75e4cf415c422cafad1b4299a964c167eb9fb3b085d2b3b16e96d59ba99a",
+  "identityNameObjectUrl": "https://explorer.iota.org/object/0x08be1014a00dc7f106fb0ce9526fa2934d2543b35708385f34d0fb7e34591162?network=testnet",
+  "companyNameObjectUrl": "https://explorer.iota.org/object/0xbb390c55314f271eb904e598954711fda075af8604b33c948712f29810fe4386?network=testnet"
+}

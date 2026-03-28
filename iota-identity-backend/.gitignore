@@ -1,0 +1,6 @@
+/target/
+*.stronghold
+*_did.json
+*_fragment.txt
+*.jwt
+.env

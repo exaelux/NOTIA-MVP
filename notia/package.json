@@ -1,0 +1,44 @@
+{
+  "name": "ncr-engine",
+  "version": "0.1.0",
+  "description": "Notia Compliance Runtime consuming @notia/core",
+  "type": "module",
+  "main": "./dist/src/cli/index.js",
+  "bin": {
+    "notia": "bin/notia"
+  },
+  "scripts": {
+    "build": "tsc",
+    "notia": "node dist/src/cli/index.js",
+    "demo:final": "./bin/notia",
+    "demo:bordertest": "node dist/src/bordertest/demo.js",
+    "demo:tui": "node dist/src/bordertest/demo-tui.js",
+    "demo:tui:fail": "node dist/src/bordertest/demo-tui-fail.js",
+    "demo:mvp": "node dist/src/mvp/demo-tui.js",
+    "start": "node dist/src/cli/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "validate:demo": "node dist/scripts/validate-cli-demo.js",
+    "demo:watch": "node dist/src/bordertest/demo-tui-watch.js"
+  },
+  "keywords": [
+    "ncr",
+    "notia",
+    "compliance",
+    "runtime"
+  ],
+  "license": "ISC",
+  "dependencies": {
+    "@iota/iota-names-sdk": "^0.5.1",
+    "@iota/iota-sdk": "^1.10.1",
+    "@iota/notarization": "^0.1.5",
+    "@notia/core": "file:../notia-core",
+    "chalk": "^5.6.2",
+    "dotenv": "^17.3.1",
+    "ora": "^9.3.0",
+    "terminal-link": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.2.3",
+    "typescript": "^5.9.3"
+  }
+}

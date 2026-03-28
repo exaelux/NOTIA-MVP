@@ -1,0 +1,9 @@
+{
+  "event_id": "evt-1",
+  "domain": "access",
+  "type": "access_attempt",
+  "timestamp": "2026-02-14T10:00:00Z",
+  "meaning": {
+    "action": "enter"
+  }
+}

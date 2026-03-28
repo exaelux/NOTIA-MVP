@@ -1,0 +1,42 @@
+[
+  {
+    "event_id": "bt-001",
+    "domain": "identity",
+    "type": "driver_identity_check",
+    "timestamp": "2026-02-21T09:00:00Z",
+    "subject_ref": "did:iota:testnet:0xd8c389d4140b8c4330425b79f5d7f20bb4dbc78145af93c5629ecc713852de73",
+    "attributes": {
+      "identity_status": "verified"
+    }
+  },
+  {
+    "event_id": "bt-002",
+    "domain": "token",
+    "type": "vehicle_cert_check",
+    "timestamp": "2026-02-21T09:01:00Z",
+    "subject_ref": "vehicle:plate:TRUCK-BorderTest",
+    "attributes": {
+      "token_id": "0x130aad9149f719a3feb40720e8dde5551e895b8de4413d9d40aeb02df9aeead3",
+      "certified": false,
+      "expired": false
+    }
+  },
+  {
+    "event_id": "bt-003",
+    "domain": "supply",
+    "type": "pharma_cargo_check",
+    "timestamp": "2026-02-21T09:02:00Z",
+    "subject_ref": "cargo:lot:pharma-789",
+    "attributes": {
+      "temperature_ok": false,
+      "logs": [
+        "cold_chain_temperature_log",
+        "geo_tracking_log",
+        "weight_verification_scan",
+        "humidity_sensor_data",
+        "seal_integrity_check",
+        "xray_scan_result"
+      ]
+    }
+  }
+]

@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/exaelux/noema-core-v0/schemas/noema-core-pure.schema.json",
+  "title": "Noema Core Pure v0.1",
+  "description": "Minimal semantic nucleus: existence, opaque meaning, abstract visibility",
+  "type": "object",
+  "properties": {
+    "noema_version": {
+      "type": "string",
+      "const": "0.1",
+      "description": "Noema Core version"
+    },
+    "object_id": {
+      "type": "string",
+      "description": "Stable identifier of the semantic object",
+      "pattern": "^[a-zA-Z0-9:._-]+$"
+    },
+    "existence": {
+      "type": "boolean",
+      "description": "Semantic confirmation that the object is addressable and readable on-chain for interpretation purposes"
+    },
+    "meaning": {
+      "description": "Opaque semantic descriptor derived exclusively from declared states or verifiable proofs. The Core imposes no structure or ontology.",
+      "oneOf": [
+        { "type": "string" },
+        { "type": "object" },
+        { "type": "array" },
+        { "type": "number" },
+        { "type": "boolean" },
+        { "type": "null" }
+      ]
+    },
+    "visibility_abstract": {
+      "type": "string",
+      "description": "Non-normative semantic hint describing general visibility conditions. Not access control.",
+      "minLength": 1
+    },
+    "derived_from": {
+      "type": ["string", "array"],
+      "items": { "type": "string" },
+      "description": "Optional non-semantic traceability hint. Not a source of truth and not used in core semantic interpretation."
+    }
+  },
+  "required": ["existence", "meaning", "visibility_abstract"],
+  "additionalProperties": false
+}

@@ -1,0 +1,344 @@
+#!/usr/bin/env node
+import { execFile } from "node:child_process";
+import { existsSync, realpathSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { promisify } from "node:util";
+import { pathToFileURL } from "node:url";
+
+const execFileAsync = promisify(execFile);
+
+function isFetchRequestLike(value) {
+  return typeof Request !== "undefined" && value instanceof Request;
+}
+
+function isSupportedCurlBody(body) {
+  return (
+    typeof body === "string" ||
+    body instanceof URLSearchParams ||
+    body instanceof Uint8Array ||
+    body instanceof ArrayBuffer
+  );
+}
+
+async function normalizeRequestForCurl(input, init = {}) {
+  const request = isFetchRequestLike(input) ? input : null;
+  const url =
+    input instanceof URL
+      ? input.toString()
+      : request
+        ? request.url
+        : String(input);
+
+  const headers = new Headers(request ? request.headers : undefined);
+  if (init.headers) {
+    const overrideHeaders = new Headers(init.headers);
+    overrideHeaders.forEach((value, key) => headers.set(key, value));
+  }
+
+  const method = (init.method ?? (request ? request.method : "GET") ?? "GET").toUpperCase();
+  let body = init.body ?? null;
+
+  if (body == null && request && method !== "GET" && method !== "HEAD") {
+    const requestBody = await request.clone().arrayBuffer();
+    body = requestBody.byteLength > 0 ? requestBody : null;
+  }
+
+  if (body instanceof URLSearchParams) {
+    return { url, method, headers, body: body.toString() };
+  }
+  if (body instanceof ArrayBuffer) {
+    return { url, method, headers, body: Buffer.from(body).toString("utf8") };
+  }
+  if (body instanceof Uint8Array) {
+    return { url, method, headers, body: Buffer.from(body).toString("utf8") };
+  }
+  if (body == null || typeof body === "string") {
+    return { url, method, headers, body };
+  }
+
+  return { url, method, headers, body: null };
+}
+
+async function fetchWithCurl(input, init = {}) {
+  const { url, method, headers, body } = await normalizeRequestForCurl(input, init);
+  const args = [
+    "-sS",
+    "-L",
+    "--max-time",
+    process.env.NCR_CURL_MAX_TIME_SECONDS?.trim() || "15",
+    "-X",
+    method,
+  ];
+
+  headers.forEach((value, key) => {
+    args.push("-H", `${key}: ${value}`);
+  });
+
+  if (body != null && isSupportedCurlBody(body)) {
+    args.push("--data-binary", typeof body === "string" ? body : Buffer.from(body).toString("utf8"));
+  }
+
+  const statusMarker = "__NCR_CURL_STATUS__:";
+  const typeMarker = "__NCR_CURL_CONTENT_TYPE__:";
+  args.push("-w", `\n${statusMarker}%{http_code}\n${typeMarker}%{content_type}`);
+  args.push(url);
+
+  const { stdout } = await execFileAsync("curl", args, {
+    encoding: "utf8",
+    maxBuffer: 10 * 1024 * 1024,
+  });
+
+  const statusIndex = stdout.lastIndexOf(`\n${statusMarker}`);
+  const typeIndex = stdout.lastIndexOf(`\n${typeMarker}`);
+  if (statusIndex === -1 || typeIndex === -1 || typeIndex < statusIndex) {
+    throw new Error(`curl fallback returned an unexpected response shape for ${url}`);
+  }
+
+  const responseText = stdout.slice(0, statusIndex);
+  const statusLine = stdout
+    .slice(statusIndex + `\n${statusMarker}`.length, typeIndex)
+    .trim();
+  const contentType = stdout.slice(typeIndex + `\n${typeMarker}`.length).trim();
+  const status = Number.parseInt(statusLine, 10);
+
+  const responseHeaders = new Headers();
+  if (contentType) {
+    responseHeaders.set("content-type", contentType);
+  }
+
+  return new Response(responseText, {
+    status: Number.isFinite(status) ? status : 500,
+    headers: responseHeaders,
+  });
+}
+
+function shouldUseCurlFallback(error) {
+  const text = error instanceof Error
+    ? `${error.name} ${error.message} ${error.cause?.code ?? ""} ${error.cause?.message ?? ""}`
+    : String(error);
+  return /fetch failed|timed out|ETIMEDOUT|ECONN|EAI_|ENET/i.test(text);
+}
+
+function installFetchFallback() {
+  if (process.env.NCR_FETCH_FALLBACK === "0") {
+    return;
+  }
+  if (globalThis.__ncrFetchFallbackInstalled) {
+    return;
+  }
+  if (typeof globalThis.fetch !== "function") {
+    return;
+  }
+
+  const nativeFetch = globalThis.fetch.bind(globalThis);
+  globalThis.fetch = async (input, init) => {
+    try {
+      return await nativeFetch(input, init);
+    } catch (error) {
+      if (!shouldUseCurlFallback(error)) {
+        throw error;
+      }
+      return fetchWithCurl(input, init);
+    }
+  };
+  globalThis.__ncrFetchFallbackInstalled = true;
+}
+
+async function isReachable(url) {
+  try {
+    await fetch(url, { method: "POST" });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function ensureIdentityBackend() {
+  const endpoint = process.env.IDENTITY_SERVICE_URL ?? "http://localhost:3002";
+  let endpointUrl;
+  try {
+    endpointUrl = new URL(endpoint);
+  } catch {
+    return;
+  }
+
+  const isLocal =
+    endpointUrl.hostname === "localhost" ||
+    endpointUrl.hostname === "127.0.0.1" ||
+    endpointUrl.hostname === "::1";
+  if (!isLocal) {
+    return;
+  }
+
+  const verifyUrl = new URL("/driver/verify", endpointUrl).toString();
+  if (await isReachable(verifyUrl)) {
+    return;
+  }
+
+  const [
+    { spawn, spawnSync },
+    { config },
+    { existsSync, openSync, closeSync, realpathSync },
+    { dirname, resolve },
+  ] =
+    await Promise.all([
+      import("node:child_process"),
+      import("dotenv"),
+      import("node:fs"),
+      import("node:path"),
+    ]);
+
+  config({ quiet: true });
+
+  const scriptPath = process.argv[1] ? realpathSync(process.argv[1]) : "";
+  const binDir = scriptPath ? dirname(scriptPath) : process.cwd();
+  const backendCandidates = [
+    resolve(binDir, "../../iota-identity-backend"),
+    resolve(process.cwd(), "../iota-identity-backend"),
+  ];
+  const backendDir = backendCandidates.find((candidate) =>
+    existsSync(resolve(candidate, "start.sh"))
+  );
+  if (!backendDir) {
+    return;
+  }
+
+  const childEnv = { ...process.env };
+  if (!childEnv.IOTA_API_ENDPOINT && childEnv.IOTA_RPC_URL) {
+    childEnv.IOTA_API_ENDPOINT = childEnv.IOTA_RPC_URL;
+  }
+  if (!childEnv.STRONGHOLD_PASSWORD) {
+    childEnv.STRONGHOLD_PASSWORD = "notia-dev";
+  }
+
+  const logPath = "/tmp/ncr-identity-backend.log";
+  const runningPattern =
+    `${backendDir}/target/release/identity-server|` +
+    `${backendDir}/target/release/iota-identity-backend|` +
+    `cargo build --release --manifest-path ${backendDir}/Cargo.toml`;
+  const bootstrapRunning =
+    spawnSync("pgrep", ["-f", runningPattern], { stdio: "ignore" }).status === 0;
+
+  if (!bootstrapRunning) {
+    const logFd = openSync(logPath, "a");
+    spawn("bash", ["-lc", "./start.sh"], {
+      cwd: backendDir,
+      env: childEnv,
+      detached: true,
+      stdio: ["ignore", logFd, logFd],
+    }).unref();
+    closeSync(logFd);
+    console.log(`[ncr] Starting local identity backend (${backendDir})...`);
+    console.log(`[ncr] Build logs: ${logPath}`);
+  } else {
+    console.log("[ncr] Local identity backend bootstrap already in progress...");
+    console.log(`[ncr] Build logs: ${logPath}`);
+  }
+
+  for (let i = 0; i < 300; i++) {
+    if (await isReachable(verifyUrl)) {
+      return;
+    }
+    await sleep(500);
+  }
+
+  console.log(
+    `[ncr] Identity backend is still starting. You can check progress at ${logPath}`
+  );
+}
+
+async function main() {
+  if (!process.env.DOTENV_CONFIG_QUIET) {
+    process.env.DOTENV_CONFIG_QUIET = "true";
+  }
+  installFetchFallback();
+  const scriptPath = process.argv[1] ? realpathSync(process.argv[1]) : "";
+  const binDir = scriptPath ? dirname(scriptPath) : process.cwd();
+  if (!process.env.NCR_ENGINE_HOME) {
+    process.env.NCR_ENGINE_HOME = resolve(binDir, "..");
+  }
+  if (process.cwd() !== process.env.NCR_ENGINE_HOME) {
+    process.chdir(process.env.NCR_ENGINE_HOME);
+  }
+  const { config } = await import("dotenv");
+  config({ quiet: true });
+
+  const args = process.argv.slice(2);
+  let mode = "canonical";
+  let watchMode = true;
+  let profileId = process.env.NCR_PROFILE;
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg === "mvp") {
+      mode = "mvp";
+      continue;
+    }
+    if (arg === "fronter" || arg === "frontier" || arg === "border" || arg === "scenario") {
+      mode = "border";
+      continue;
+    }
+    if (arg === "canonical") {
+      mode = "canonical";
+      continue;
+    }
+    if (arg === "--profile") {
+      const next = args[i + 1];
+      if (next) {
+        profileId = next;
+        i++;
+      }
+      continue;
+    }
+    if (arg.startsWith("--profile=")) {
+      profileId = arg.slice("--profile=".length);
+      continue;
+    }
+    if (arg === "demo" || arg === "--demo" || arg === "--no-watch") {
+      mode = "border";
+      watchMode = false;
+      continue;
+    }
+    if (arg === "watch" || arg === "--watch") {
+      mode = "border";
+      watchMode = true;
+    }
+  }
+  if (profileId) {
+    process.env.NCR_PROFILE = profileId;
+  }
+  process.env.NCR_WATCH_ANIMATE = watchMode ? "1" : "0";
+
+  if (mode === "mvp") {
+    await ensureIdentityBackend();
+    const mvpCandidates = [resolve(binDir, "../dist/src/mvp/demo-tui.js")];
+    const mvpEntry = mvpCandidates.find((candidate) => existsSync(candidate));
+    if (!mvpEntry) {
+      throw new Error(
+        `MVP runtime not found. Build ncr-engine first (npm run -s build): ${mvpCandidates.join(", ")}`
+      );
+    }
+    await import(pathToFileURL(mvpEntry).href);
+    return;
+  }
+
+  await ensureIdentityBackend();
+  if (mode === "canonical") {
+    const canonicalCandidates = [resolve(binDir, "../dist/src/canonical/demo-tui.js")];
+    const canonicalEntry = canonicalCandidates.find((candidate) => existsSync(candidate));
+    if (!canonicalEntry) {
+      throw new Error(
+        `Canonical runtime not found. Build ncr-engine first (npm run -s build): ${canonicalCandidates.join(", ")}`
+      );
+    }
+    await import(pathToFileURL(canonicalEntry).href);
+    return;
+  }
+
+  await import("../dist/src/bordertest/demo-tui-watch.js");
+}
+
+void main();

@@ -1,0 +1,47 @@
+node_modules/
+dist/
+*.log
+.env*
+!.env.example
+.DS_Store
+coverage/
+
+# Move build artifacts
+move/**/build/
+
+# Accidental local artifacts
+ncr-engine@*
+tsc
+
+# Local wallet material
+company-wallet.json
+wallet*.json
+profiles/*.local.json
+secrets/
+*.secret
+*.secrets
+*.credentials
+*.token
+*.seed
+*.mnemonic
+*.pem
+*.key
+*.p12
+*.pfx
+*.jwk
+*.keystore
+*.stronghold
+*.jwt
+*.pid
+*.tmp
+*.bak
+driver_did.json
+issuer_did.json
+driver_fragment.txt
+issuer_fragment.txt
+driver_vc.jwt
+driver_vp.jwt
+issuer_vc.jwt
+issuer_vp.jwt
+*.mjs
+test-*.mjs

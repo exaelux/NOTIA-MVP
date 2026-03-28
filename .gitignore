@@ -1,0 +1,35 @@
+# Workspace-wide generated artifacts
+**/node_modules/
+**/target/
+**/coverage/
+**/.DS_Store
+**/*.log
+**/*.pid
+**/*.tmp
+**/*.bak
+
+# Runtime environment files
+**/.env
+**/.env.local
+**/.env.*.local
+
+# Keep sample envs committed
+!**/.env.example
+
+# Local secrets and wallet material
+**/*.secret
+**/*.secrets
+**/*.credentials
+**/*.token
+**/*.seed
+**/*.mnemonic
+**/*.pem
+**/*.key
+**/*.p12
+**/*.pfx
+**/*.jwk
+**/*.keystore
+**/*.stronghold
+**/*.jwt
+**/wallet*.json
+**/company-wallet.json

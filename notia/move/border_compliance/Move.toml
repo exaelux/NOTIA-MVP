@@ -1,0 +1,12 @@
+[package]
+name = "border_compliance"
+edition = "2024"
+
+[dependencies]
+
+[addresses]
+border_compliance = "0x0"
+
+[dev-dependencies]
+
+[dev-addresses]

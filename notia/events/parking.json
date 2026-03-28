@@ -1,0 +1,53 @@
+[
+  {
+    "event_id": "evt-park-1",
+    "domain": "access",
+    "type": "vehicle_entry",
+    "timestamp": "2026-02-14T10:00:00Z",
+    "subject_ref": "vehicle:plate:ABC123",
+    "attributes": {
+      "action": "enter"
+    }
+  },
+  {
+    "event_id": "evt-park-2",
+    "domain": "token",
+    "type": "parking_token_validation",
+    "timestamp": "2026-02-14T10:03:00Z",
+    "subject_ref": "token:parking-session-001",
+    "attributes": {
+      "token_id": "parking-session-001",
+      "token_standard": "IOTA-TOKEN"
+    }
+  },
+  {
+    "event_id": "evt-park-3",
+    "domain": "identity",
+    "type": "identity_check",
+    "timestamp": "2026-02-14T10:06:00Z",
+    "subject_ref": "did:iota:user:abc123",
+    "attributes": {
+      "identity_status": "pending"
+    }
+  },
+  {
+    "event_id": "evt-park-4",
+    "domain": "identity",
+    "type": "identity_check",
+    "timestamp": "2026-02-14T10:09:00Z",
+    "subject_ref": "did:iota:user:abc123",
+    "attributes": {
+      "identity_status": "verified"
+    }
+  },
+  {
+    "event_id": "evt-park-5",
+    "domain": "access",
+    "type": "vehicle_exit",
+    "timestamp": "2026-02-14T10:15:00Z",
+    "subject_ref": "vehicle:plate:ABC123",
+    "attributes": {
+      "action": "exit"
+    }
+  }
+]
