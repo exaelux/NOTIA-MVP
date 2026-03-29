@@ -33,3 +33,6 @@
 **/*.jwt
 **/wallet*.json
 **/company-wallet.json
+
+# Local delivery artifacts
+/delivery/
